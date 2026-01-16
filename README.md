@@ -1,8 +1,12 @@
-# 🎵 Soundboard
+<h1 align="center">🎵 Soundboard</h1>
 
-A professional soundboard with 48 customizable pads, integrated audio trimming, fade in/out effects, and multi-language support.
+<p align="center">
+  A professional soundboard with 48 customizable pads, integrated audio trimming, fade in/out effects, and multi-language support.
+</p>
 
-![Soundboard](logo.png)
+<p align="center">
+  <img src="logo.png" alt="Soundboard Logo" width="200"/>
+</p>
 
 ## 📸 Screenshots
 
