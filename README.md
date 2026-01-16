@@ -33,11 +33,6 @@ A professional soundboard with 48 customizable pads, integrated audio trimming, 
 - **English** 🇬🇧
 - Language selection on first launch
 
-### 📱 Responsive Design
-- **Desktop**: Full grid view (4 categories visible)
-- **Tablet**: Paginated view with dot navigation
-- **Mobile**: Optimized column view
-
 ### 💾 Local Storage
 - **localStorage**: All data saved locally
 - **Base64 audio**: No server needed
