@@ -93,7 +93,7 @@ A professional soundboard with 48 customizable pads, integrated audio trimming, 
 
 ```bash
 # Download latest release from GitHub
-wget https://github.com/yourusername/soundboard/releases/download/v1.0.0/soundboard_1.0.0_amd64.deb
+wget https://github.com/Chazy12/simplesoundboard/releases/download/v1.0.0/soundboard_1.0.0_amd64.deb
 
 # Install
 sudo dpkg -i soundboard_1.0.0_amd64.deb
