@@ -93,9 +93,7 @@
 - **RAM**: 512 MB minimum
 - **Storage**: 50 MB for application + space for audio
 
-## 🚀 Installation
-
-### .deb Package
+## 🚀 Installation, uninstallation and clean residue
 
 ```bash
 # Download latest release from GitHub
