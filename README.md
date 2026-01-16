@@ -95,7 +95,7 @@
 
 ## 🚀 Installation
 
-### Method 1: .deb Package (Recommended)
+### .deb Package
 
 ```bash
 # Download latest release from GitHub
