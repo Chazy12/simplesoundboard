@@ -108,6 +108,17 @@ sudo dpkg -i soundboard_1.0.0_amd64.deb
 soundboard
 ```
 
+```bash
+### Reset the app
+# Reset the app without uninstalling
+rm -rf ~/.local/share/com.soundboard.app ~/.local/share/soundboard ~/.config/com.soundboard.app ~/.cache/com.soundboard.app
+```
+
+```bash
+### Uninstall the app
+# Uninstall and clean residue
+sudo apt purge simplesoundboard -y && rm -rf ~/.local/share/com.soundboard.app ~/.local/share/soundboard ~/.config/com.soundboard.app ~/.cache/com.soundboard.app && echo "Disinstallazione e pulizia completata."
+```
 ## ⌨️ Keyboard Shortcuts
 
 | Action | Key |
