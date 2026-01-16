@@ -4,6 +4,13 @@ A professional soundboard with 48 customizable pads, integrated audio trimming, 
 
 ![Soundboard](logo.png)
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/screenshot-main.png" width="45%" />
+  <img src="screenshots/screenshot-trimmer.png" width="45%" />
+</p>
+
 ## ✨ Features
 
 ### 🎛️ 48 Customizable Pads
