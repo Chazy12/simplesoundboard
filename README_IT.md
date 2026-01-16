@@ -4,6 +4,13 @@ Una soundboard professionale con 48 pad personalizzabili, trimming audio integra
 
 ![Soundboard](logo.png)
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="screenshots/screenshot-main.png" width="45%" />
+  <img src="screenshots/screenshot-trimmer.png" width="45%" />
+</p>
+
 ## ✨ Caratteristiche
 
 ### 🎛️ 48 Pad Personalizzabili
@@ -32,11 +39,6 @@ Una soundboard professionale con 48 pad personalizzabili, trimming audio integra
 - **Italiano** 🇮🇹
 - **English** 🇬🇧
 - Selezione lingua al primo avvio
-
-### 📱 Design Responsivo
-- **Desktop**: Vista a griglia completa (4 categorie visibili)
-- **Tablet**: Vista paginata con navigazione a pallini
-- **Mobile**: Vista a colonne ottimizzata
 
 ### 💾 Salvataggio Locale
 - **localStorage**: Tutti i dati salvati localmente
