@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Soundboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #2d1b4e;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+        
+        /* Volume Sidebar */
+        .volume-sidebar {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 15px;
+            border-radius: 15px 0 0 15px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .volume-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .volume-slider {
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            width: 8px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ffa3;
+            cursor: pointer;
+        }
+        
+        .volume-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #00ffa3;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .logo-img {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 10px;
+            display: block;
+        }
+        
+        .title {
+            font-size: 36px;
+            font-weight: 900;
+            color: #00ffa3;
+            text-shadow: 0 0 20px #00ffa3;
+            letter-spacing: 3px;
+        }
+        
+        /* Main Container */
+        .main-container {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Desktop: All 4 categories visible */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .category {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid;
+        }
+        
+        .category.intro { border-color: #00ffa3; }
+        .category.suoni { border-color: #2196f3; }
+        .category.musiche { border-color: #e91e63; }
+        .category.effetti { border-color: #ff9800; }
+        
+        .category-header {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .category.intro .category-header { color: #00ffa3; }
+        .category.suoni .category-header { color: #2196f3; }
+        .category.musiche .category-header { color: #e91e63; }
+        .category.effetti .category-header { color: #ff9800; }
+        
+        .pads-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .pad {
+            aspect-ratio: 1.3;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.7);
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .pad:active {
+            transform: scale(0.95);
+        }
+        
+        .pad.is-playing {
+            animation: pulse 0.5s infinite;
+            box-shadow: 0 0 20px currentColor;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Tablet: One category per page with pagination */
+        @media (min-width: 768px) and (max-width: 1279px) {
+            .header {
+                padding: 15px;
+            }
+            
+            .logo-img { width: 80px; height: 80px; }
+            .title { font-size: 28px; }
+            
+            .categories-grid {
+                display: none;
+            }
+            
+            .tablet-view {
+                display: block !important;
+            }
+            
+            .category-page {
+                display: none;
+                min-height: 70vh;
+            }
+            
+            .category-page.active {
+                display: block;
+            }
+            
+            .category-page .category {
+                border: none;
+                background: none;
+                padding: 0;
+            }
+            
+            .category-page .category-header {
+                font-size: 32px;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            
+            .category-page .pads-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+            
+            .pagination-dots {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-top: 30px;
+            }
+            
+            .pagination-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            
+            .pagination-dot.active {
+                background: #00ffa3;
+                width: 40px;
+                border-radius: 6px;
+            }
+        }
+        
+        /* Mobile */
+        @media (max-width: 767px) {
+            .header {
+                padding: 10px;
+            }
+            
+            .logo-img { width: 60px; height: 60px; }
+            .title { font-size: 20px; }
+            
+            .categories-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .pads-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .volume-sidebar {
+                padding: 15px 10px;
+            }
+            
+            .volume-slider {
+                height: 100px;
+            }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid #00ffa3;
+        }
+        
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #00ffa3;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-weight: 600;
+        }
+        
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .color-picker-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .color-option.selected {
+            border-color: white;
+            transform: scale(1.1);
+        }
+        
+        .file-upload {
+            margin-top: 10px;
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .file-upload-btn {
+            display: block;
+            padding: 15px;
+            background: #2a2a2a;
+            border: 2px dashed #666;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #aaa;
+        }
+        
+        .file-upload-btn:hover {
+            border-color: #00ffa3;
+            background: #333;
+        }
+        
+        .file-upload-btn.has-file {
+            border-color: #00ffa3;
+            background: rgba(0, 255, 163, 0.1);
+            color: #00ffa3;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-cancel {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-save {
+            background: #00ffa3;
+            color: #2d1b4e;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: white;
+        }
+        
+        /* Audio Trimmer */
+        .audio-trimmer {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 163, 0.3);
+        }
+        
+        .audio-trimmer.active {
+            display: block;
+        }
+        
+        .trimmer-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00ffa3;
+            margin-bottom: 15px;
+        }
+        
+        .waveform-container {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .waveform-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .selection-overlay {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(0, 255, 163, 0.2);
+            border-left: 2px solid #00ffa3;
+            border-right: 2px solid #00ffa3;
+            pointer-events: none;
+        }
+        
+        .trimmer-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .trimmer-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .trimmer-slider-label {
+            font-size: 13px;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .trimmer-slider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .trimmer-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ffa3;
+            cursor: pointer;
+        }
+        
+        .trimmer-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ffa3;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .trimmer-playback {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .trimmer-play-btn {
+            padding: 10px 25px;
+            background: #00ffa3;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .trimmer-play-btn:hover {
+            background: #00cc82;
+        }
+        
+        .trimmer-duration {
+            font-size: 14px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .language-selector.active {
+            display: flex;
+        }
+        
+        .language-box {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #00ffa3;
+            text-align: center;
+        }
+        
+        .language-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ffa3;
+            margin-bottom: 10px;
+        }
+        
+        .language-subtitle {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        
+        .language-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .language-btn {
+            padding: 20px;
+            background: rgba(0, 255, 163, 0.1);
+            border: 2px solid #00ffa3;
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .language-btn:hover {
+            background: rgba(0, 255, 163, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .language-btn .flag {
+            font-size: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector" id="languageSelector">
+        <div class="language-box">
+            <div class="language-title">Choose Language / Scegli Lingua</div>
+            <div class="language-subtitle">Select your preferred language / Seleziona la tua lingua</div>
+            <div class="language-buttons">
+                <button class="language-btn" onclick="selectLanguage('it')">
+                    <span class="flag">🇮🇹</span>
+                    <span>Italiano</span>
+                </button>
+                <button class="language-btn" onclick="selectLanguage('en')">
+                    <span class="flag">🇬🇧</span>
+                    <span>English</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading -->
+    <div class="loading" id="loading">Caricamento...</div>
+
+    <!-- Volume Sidebar -->
+    <div class="volume-sidebar">
+        <div class="volume-icon" onclick="toggleMute()">🔊</div>
+        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="100" orient="vertical">
+        <div class="volume-value" id="volumeValue">100%</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <img src="logo.png" alt="Soundboard" class="logo-img">
+        <div class="title">SOUNDBOARD</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" style="display: none;">
+        <!-- Desktop View -->
+        <div class="categories-grid" id="desktopView">
+            <div class="category intro">
+                <div class="category-header">🎬 INTRO</div>
+                <div class="pads-grid" id="introGrid"></div>
+            </div>
+            <div class="category suoni">
+                <div class="category-header">🔊 SUONI</div>
+                <div class="pads-grid" id="suoniGrid"></div>
+            </div>
+            <div class="category musiche">
+                <div class="category-header">🎵 MUSICHE</div>
+                <div class="pads-grid" id="musicheGrid"></div>
+            </div>
+            <div class="category effetti">
+                <div class="category-header">✨ EFFETTI</div>
+                <div class="pads-grid" id="effettiGrid"></div>
+            </div>
+        </div>
+
+        <!-- Tablet View -->
+        <div class="tablet-view" id="tabletView" style="display: none;">
+            <div class="category-page active" data-page="0">
+                <div class="category intro">
+                    <div class="category-header">🎬 INTRO</div>
+                    <div class="pads-grid" id="introGridTablet"></div>
+                </div>
+            </div>
+            <div class="category-page" data-page="1">
+                <div class="category suoni">
+                    <div class="category-header">🔊 SUONI</div>
+                    <div class="pads-grid" id="suoniGridTablet"></div>
+                </div>
+            </div>
+            <div class="category-page" data-page="2">
+                <div class="category musiche">
+                    <div class="category-header">🎵 MUSICHE</div>
+                    <div class="pads-grid" id="musicheGridTablet"></div>
+                </div>
+            </div>
+            <div class="category-page" data-page="3">
+                <div class="category effetti">
+                    <div class="category-header">✨ EFFETTI</div>
+                    <div class="pads-grid" id="effettiGridTablet"></div>
+                </div>
+            </div>
+            
+            <div class="pagination-dots" id="paginationDots">
+                <div class="pagination-dot active" data-page="0"></div>
+                <div class="pagination-dot" data-page="1"></div>
+                <div class="pagination-dot" data-page="2"></div>
+                <div class="pagination-dot" data-page="3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            
+            <div class="form-group">
+                <label id="padNameLabel"></label>
+                <input type="text" id="padName" placeholder="">
+            </div>
+            
+            <div class="form-group">
+                <label id="colorLabel"></label>
+                <div class="color-picker-container" id="colorPicker"></div>
+            </div>
+            
+            <div class="form-group">
+                <label id="audioFileLabel"></label>
+                <div class="file-upload">
+                    <input type="file" id="audioFile" accept="audio/*">
+                    <label for="audioFile" class="file-upload-btn" id="fileUploadBtn">
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Audio Trimmer -->
+            <div class="audio-trimmer" id="audioTrimmer">
+                <div class="trimmer-header">✂️ Taglia Audio</div>
+                
+                <div class="waveform-container">
+                    <canvas class="waveform-canvas" id="waveformCanvas"></canvas>
+                    <div class="selection-overlay" id="selectionOverlay"></div>
+                </div>
+                
+                <div class="trimmer-controls">
+                    <div class="trimmer-slider-group">
+                        <div class="trimmer-slider-label">
+                            <span>Inizio</span>
+                            <span id="startTime">0:00</span>
+                        </div>
+                        <input type="range" class="trimmer-slider" id="startSlider" min="0" max="100" value="0" step="0.1">
+                    </div>
+                    
+                    <div class="trimmer-slider-group">
+                        <div class="trimmer-slider-label">
+                            <span>Fine</span>
+                            <span id="endTime">0:00</span>
+                        </div>
+                        <input type="range" class="trimmer-slider" id="endSlider" min="0" max="100" value="100" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="trimmer-playback">
+                    <button class="trimmer-play-btn" id="playPreviewBtn">
+                        <span id="playIcon">▶️</span> <span id="playText">Anteprima</span>
+                    </button>
+                    <div class="trimmer-duration">
+                        Durata: <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal()">Annulla</button>
+                <button class="btn btn-delete" onclick="clearPad()">Svuota</button>
+                <button class="btn btn-save" id="saveBtn" onclick="savePad()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            it: {
+                loading: 'Caricamento...',
+                intro: '🎬 INTRO',
+                sounds: '🔊 SUONI',
+                music: '🎵 MUSICHE',
+                effects: '✨ EFFETTI',
+                empty: 'Vuoto',
+                configurePad: 'Configura Pad',
+                padName: 'Nome del Pad',
+                namePlaceholder: 'Inserisci nome...',
+                color: 'Colore',
+                audioFile: 'File Audio',
+                selectAudio: 'Seleziona file audio',
+                trimAudio: '✂️ Taglia Audio',
+                start: 'Inizio',
+                end: 'Fine',
+                duration: 'Durata',
+                preview: 'Anteprima',
+                stop: 'Stop',
+                cancel: 'Annulla',
+                clear: 'Svuota',
+                save: 'Salva',
+                confirmClear: 'Vuoi davvero svuotare questo pad?',
+                enterName: 'Inserisci un nome!'
+            },
+            en: {
+                loading: 'Loading...',
+                intro: '🎬 INTRO',
+                sounds: '🔊 SOUNDS',
+                music: '🎵 MUSIC',
+                effects: '✨ EFFECTS',
+                empty: 'Empty',
+                configurePad: 'Configure Pad',
+                padName: 'Pad Name',
+                namePlaceholder: 'Enter name...',
+                color: 'Color',
+                audioFile: 'Audio File',
+                selectAudio: 'Select audio file',
+                trimAudio: '✂️ Trim Audio',
+                start: 'Start',
+                end: 'End',
+                duration: 'Duration',
+                preview: 'Preview',
+                stop: 'Stop',
+                cancel: 'Cancel',
+                clear: 'Clear',
+                save: 'Save',
+                confirmClear: 'Do you really want to clear this pad?',
+                enterName: 'Please enter a name!'
+            }
+        };
+        
+        let currentLanguage = localStorage.getItem('soundboard_language') || null;
+        
+        const colors = [
+            '#00ffa3', '#1976d2', '#42a5f5', '#64b5f6', '#90caf9',
+            '#7e57c2', '#e91e63', '#f06292', '#ef5350', '#ff7043',
+            '#ffa726', '#ffca28', '#ffeb3b', '#9ccc65', '#66bb6a'
+        ];
+
+        let pads = Array(48).fill(null).map((_, i) => ({
+            id: i,
+            category: i < 12 ? 'intro' : i < 24 ? 'suoni' : i < 36 ? 'musiche' : 'effetti',
+            name: '',
+            color: colors[Math.floor(i / 12) * 2],
+            audioPath: null,
+            audioFileName: '',
+            audio: null,
+            isPlaying: false,
+            fadeInterval: null
+        }));
+
+        let currentPadId = null;
+        let masterVolume = 1.0;
+        let selectedColor = colors[0];
+        let pendingAudioFile = null;
+        let isTablet = false;
+        let currentPage = 0;
+        const LONG_PRESS_TIME = 800;
+        let longPressTimer = null;
+        let isLongPress = false;
+        
+        // Audio trimmer variables
+        let audioContext = null;
+        let audioBuffer = null;
+        let previewSource = null;
+        let isPreviewPlaying = false;
+        let startPercent = 0;
+        let endPercent = 100;
+
+        // LocalStorage functions
+        function saveToLocalStorage() {
+            const data = pads.map(pad => ({
+                id: pad.id,
+                category: pad.category,
+                name: pad.name,
+                color: pad.color,
+                audioPath: pad.audioPath,
+                audioFileName: pad.audioFileName
+            }));
+            localStorage.setItem('soundboard_pads', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const stored = localStorage.getItem('soundboard_pads');
+            if (stored) {
+                const data = JSON.parse(stored);
+                data.forEach(savedPad => {
+                    if (pads[savedPad.id]) {
+                        pads[savedPad.id].name = savedPad.name;
+                        pads[savedPad.id].color = savedPad.color;
+                        pads[savedPad.id].audioPath = savedPad.audioPath;
+                        pads[savedPad.id].audioFileName = savedPad.audioFileName;
+                        
+                        if (savedPad.audioPath) {
+                            pads[savedPad.id].audio = new Audio(savedPad.audioPath);
+                            pads[savedPad.id].audio.volume = masterVolume;
+                        }
+                    }
+                });
+            }
+        }
+
+        function checkScreenSize() {
+            const width = window.innerWidth;
+            isTablet = width >= 768 && width <= 1279;
+            
+            if (isTablet) {
+                document.getElementById('desktopView').style.display = 'none';
+                document.getElementById('tabletView').style.display = 'block';
+            } else {
+                document.getElementById('desktopView').style.display = 'grid';
+                document.getElementById('tabletView').style.display = 'none';
+            }
+        }
+
+        // Volume Control
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        
+        volumeSlider.addEventListener('input', function() {
+            masterVolume = this.value / 100;
+            volumeValue.textContent = this.value + '%';
+            updateAllVolumes();
+        });
+
+        window.toggleMute = function() {
+            if (masterVolume > 0) {
+                volumeSlider.value = 0;
+                masterVolume = 0;
+                volumeValue.textContent = '0%';
+            } else {
+                volumeSlider.value = 100;
+                masterVolume = 1;
+                volumeValue.textContent = '100%';
+            }
+            updateAllVolumes();
+        };
+
+        function updateAllVolumes() {
+            pads.forEach(pad => {
+                if (pad.audio) {
+                    pad.audio.volume = masterVolume;
+                }
+            });
+        }
+
+        // Pagination
+        function setupPagination() {
+            const dots = document.querySelectorAll('.pagination-dot');
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const page = parseInt(dot.dataset.page);
+                    goToPage(page);
+                });
+            });
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.category-page').forEach((el, idx) => {
+                el.classList.toggle('active', idx === page);
+            });
+            document.querySelectorAll('.pagination-dot').forEach((el, idx) => {
+                el.classList.toggle('active', idx === page);
+            });
+        }
+
+        // Render pads
+        function renderPads() {
+            const grids = {
+                intro: document.getElementById(isTablet ? 'introGridTablet' : 'introGrid'),
+                suoni: document.getElementById(isTablet ? 'suoniGridTablet' : 'suoniGrid'),
+                musiche: document.getElementById(isTablet ? 'musicheGridTablet' : 'musicheGrid'),
+                effetti: document.getElementById(isTablet ? 'effettiGridTablet' : 'effettiGrid')
+            };
+
+            Object.values(grids).forEach(grid => {
+                if (grid) grid.innerHTML = '';
+            });
+
+            pads.forEach(pad => {
+                const grid = grids[pad.category];
+                if (!grid) return;
+
+                const padEl = document.createElement('button');
+                padEl.className = 'pad';
+                padEl.style.background = pad.color;
+                padEl.textContent = pad.name || translations[currentLanguage].empty;
+
+                if (pad.isPlaying) {
+                    padEl.classList.add('is-playing');
+                }
+
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let hasMoved = false;
+                
+                const handleStart = (e) => {
+                    hasMoved = false;
+                    isLongPress = false;
+                    
+                    if (e.touches && e.touches.length > 0) {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                    }
+                    
+                    longPressTimer = setTimeout(() => {
+                        if (!hasMoved) {
+                            isLongPress = true;
+                            openModal(pad.id);
+                        }
+                    }, LONG_PRESS_TIME);
+                };
+
+                const handleMove = (e) => {
+                    if (e.touches && e.touches.length > 0) {
+                        const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+                        const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+                        
+                        if (moveX > 10 || moveY > 10) {
+                            hasMoved = true;
+                            clearTimeout(longPressTimer);
+                        }
+                    }
+                };
+
+                const handleEnd = (e) => {
+                    e.preventDefault();
+                    clearTimeout(longPressTimer);
+                    if (!isLongPress && !hasMoved) {
+                        togglePlayPad(pad.id);
+                    }
+                };
+
+                const handleCancel = () => {
+                    clearTimeout(longPressTimer);
+                    hasMoved = true;
+                };
+
+                padEl.addEventListener('touchstart', handleStart, { passive: false });
+                padEl.addEventListener('touchend', handleEnd, { passive: false });
+                padEl.addEventListener('touchcancel', handleCancel);
+                padEl.addEventListener('touchmove', handleMove, { passive: true });
+
+                padEl.addEventListener('mousedown', handleStart);
+                padEl.addEventListener('mouseup', handleEnd);
+                padEl.addEventListener('mouseleave', handleCancel);
+
+                grid.appendChild(padEl);
+            });
+        }
+
+        // Toggle play/stop
+        function togglePlayPad(padId) {
+            const pad = pads[padId];
+            
+            if (!pad.audioPath) {
+                openModal(padId);
+                return;
+            }
+
+            if (pad.isPlaying && pad.audio) {
+                if (pad.fadeInterval) {
+                    clearInterval(pad.fadeInterval);
+                }
+                
+                const startVolume = pad.audio.volume;
+                const volumeStep = startVolume / 60;
+                
+                pad.fadeInterval = setInterval(() => {
+                    if (pad.audio.volume > volumeStep) {
+                        pad.audio.volume = Math.max(0, pad.audio.volume - volumeStep);
+                    } else {
+                        pad.audio.volume = 0;
+                        pad.audio.pause();
+                        pad.audio.currentTime = 0;
+                        pad.isPlaying = false;
+                        clearInterval(pad.fadeInterval);
+                        pad.fadeInterval = null;
+                        renderPads();
+                    }
+                }, 50);
+            } else {
+                if (pad.fadeInterval) {
+                    clearInterval(pad.fadeInterval);
+                }
+                
+                if (!pad.audio) {
+                    pad.audio = new Audio(pad.audioPath);
+                }
+                pad.audio.currentTime = 0;
+                pad.audio.volume = 0;
+                pad.audio.play();
+                pad.isPlaying = true;
+                
+                const volumeStep = masterVolume / 20;
+                
+                pad.fadeInterval = setInterval(() => {
+                    if (pad.audio.volume < masterVolume - volumeStep) {
+                        pad.audio.volume = Math.min(masterVolume, pad.audio.volume + volumeStep);
+                    } else {
+                        pad.audio.volume = masterVolume;
+                        clearInterval(pad.fadeInterval);
+                        pad.fadeInterval = null;
+                    }
+                }, 50);
+                
+                pad.audio.onended = () => {
+                    pad.isPlaying = false;
+                    if (pad.fadeInterval) {
+                        clearInterval(pad.fadeInterval);
+                        pad.fadeInterval = null;
+                    }
+                    renderPads();
+                };
+                
+                renderPads();
+            }
+        }
+
+        // Modal functions
+        function renderColorPicker() {
+            const picker = document.getElementById('colorPicker');
+            picker.innerHTML = '';
+            
+            colors.forEach(color => {
+                const option = document.createElement('div');
+                option.className = 'color-option';
+                option.style.background = color;
+                option.onclick = () => {
+                    selectedColor = color;
+                    document.querySelectorAll('.color-option').forEach(el => 
+                        el.classList.remove('selected')
+                    );
+                    option.classList.add('selected');
+                };
+                picker.appendChild(option);
+            });
+        }
+
+        window.openModal = function(padId) {
+            currentPadId = padId;
+            const pad = pads[padId];
+            pendingAudioFile = null;
+            
+            document.getElementById('padName').value = pad.name;
+            selectedColor = pad.color;
+            
+            document.querySelectorAll('.color-option').forEach((el, i) => {
+                el.classList.toggle('selected', colors[i] === pad.color);
+            });
+            
+            const fileBtn = document.getElementById('fileUploadBtn');
+            const fileInput = document.getElementById('audioFile');
+            fileInput.value = '';
+            
+            if (pad.audioFileName) {
+                fileBtn.textContent = pad.audioFileName;
+                fileBtn.classList.add('has-file');
+            } else {
+                fileBtn.textContent = translations[currentLanguage].selectAudio;
+                fileBtn.classList.remove('has-file');
+            }
+            
+            // Applica traduzioni al modal
+            document.getElementById('padName').placeholder = translations[currentLanguage].namePlaceholder;
+            
+            // Nascondi trimmer
+            document.getElementById('audioTrimmer').classList.remove('active');
+            
+            document.getElementById('modal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('modal').classList.remove('active');
+            document.getElementById('audioFile').value = '';
+            pendingAudioFile = null;
+            
+            // Stop preview e reset trimmer
+            if (previewSource) {
+                previewSource.stop();
+                previewSource = null;
+            }
+            isPreviewPlaying = false;
+            startPercent = 0;
+            endPercent = 100;
+            audioBuffer = null;
+            document.getElementById('audioTrimmer').classList.remove('active');
+        };
+
+        document.getElementById('audioFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                pendingAudioFile = file;
+                const fileBtn = document.getElementById('fileUploadBtn');
+                fileBtn.textContent = file.name;
+                fileBtn.classList.add('has-file');
+                
+                // Carica audio per trimmer
+                await loadAudioForTrimmer(file);
+            }
+        });
+        
+        // === AUDIO TRIMMER FUNCTIONS ===
+        
+        async function loadAudioForTrimmer(file) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const arrayBuffer = await file.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                document.getElementById('audioTrimmer').classList.add('active');
+                
+                startPercent = 0;
+                endPercent = 100;
+                document.getElementById('startSlider').value = 0;
+                document.getElementById('endSlider').value = 100;
+                
+                drawWaveform();
+                updateTrimmerUI();
+            } catch (error) {
+                console.error('Errore caricamento audio:', error);
+            }
+        }
+
+        function drawWaveform() {
+            const canvas = document.getElementById('waveformCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const data = audioBuffer.getChannelData(0);
+            const step = Math.ceil(data.length / canvas.width);
+            const amp = canvas.height / 2;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#00ffa3';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            
+            for (let i = 0; i < canvas.width; i++) {
+                let min = 1.0;
+                let max = -1.0;
+                
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+                
+                ctx.moveTo(i, (1 + min) * amp);
+                ctx.lineTo(i, (1 + max) * amp);
+            }
+            
+            ctx.stroke();
+        }
+
+        function updateTrimmerUI() {
+            const duration = audioBuffer.duration;
+            const startTime = (startPercent / 100) * duration;
+            const endTime = (endPercent / 100) * duration;
+            const selectedDuration = endTime - startTime;
+            
+            document.getElementById('startTime').textContent = formatTime(startTime);
+            document.getElementById('endTime').textContent = formatTime(endTime);
+            document.getElementById('duration').textContent = formatTime(selectedDuration);
+            
+            const overlay = document.getElementById('selectionOverlay');
+            overlay.style.left = startPercent + '%';
+            overlay.style.width = (endPercent - startPercent) + '%';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        document.getElementById('startSlider').addEventListener('input', (e) => {
+            startPercent = parseFloat(e.target.value);
+            if (startPercent >= endPercent) {
+                startPercent = Math.max(0, endPercent - 1);
+                e.target.value = startPercent;
+            }
+            updateTrimmerUI();
+        });
+
+        document.getElementById('endSlider').addEventListener('input', (e) => {
+            endPercent = parseFloat(e.target.value);
+            if (endPercent <= startPercent) {
+                endPercent = Math.min(100, startPercent + 1);
+                e.target.value = endPercent;
+            }
+            updateTrimmerUI();
+        });
+
+        document.getElementById('playPreviewBtn').addEventListener('click', function() {
+            if (isPreviewPlaying) {
+                if (previewSource) {
+                    previewSource.stop();
+                    previewSource = null;
+                }
+                isPreviewPlaying = false;
+                document.getElementById('playIcon').textContent = '▶️';
+                document.getElementById('playText').textContent = translations[currentLanguage].preview;
+            } else {
+                const duration = audioBuffer.duration;
+                const startTime = (startPercent / 100) * duration;
+                const endTime = (endPercent / 100) * duration;
+                const playDuration = endTime - startTime;
+                
+                previewSource = audioContext.createBufferSource();
+                previewSource.buffer = audioBuffer;
+                previewSource.connect(audioContext.destination);
+                
+                previewSource.onended = () => {
+                    isPreviewPlaying = false;
+                    previewSource = null;
+                    document.getElementById('playIcon').textContent = '▶️';
+                    document.getElementById('playText').textContent = translations[currentLanguage].preview;
+                };
+                
+                previewSource.start(0, startTime, playDuration);
+                isPreviewPlaying = true;
+                document.getElementById('playIcon').textContent = '⏸️';
+                document.getElementById('playText').textContent = translations[currentLanguage].stop;
+            }
+        });
+
+        async function trimAudio() {
+            const duration = audioBuffer.duration;
+            const startTime = (startPercent / 100) * duration;
+            const endTime = (endPercent / 100) * duration;
+            
+            const sampleRate = audioBuffer.sampleRate;
+            const startSample = Math.floor(startTime * sampleRate);
+            const endSample = Math.floor(endTime * sampleRate);
+            const trimmedLength = endSample - startSample;
+            
+            const trimmedBuffer = audioContext.createBuffer(
+                audioBuffer.numberOfChannels,
+                trimmedLength,
+                sampleRate
+            );
+            
+            for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+                const sourceData = audioBuffer.getChannelData(channel);
+                const trimmedData = trimmedBuffer.getChannelData(channel);
+                
+                for (let i = 0; i < trimmedLength; i++) {
+                    trimmedData[i] = sourceData[startSample + i];
+                }
+            }
+            
+            const wav = audioBufferToWav(trimmedBuffer);
+            return new Blob([wav], { type: 'audio/wav' });
+        }
+
+        function audioBufferToWav(buffer) {
+            const length = buffer.length * buffer.numberOfChannels * 2 + 44;
+            const arrayBuffer = new ArrayBuffer(length);
+            const view = new DataView(arrayBuffer);
+            let pos = 0;
+            
+            const setUint16 = (data) => {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            };
+            
+            const setUint32 = (data) => {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            };
+            
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8);
+            setUint32(0x45564157); // "WAVE"
+            
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16);
+            setUint16(1);
+            setUint16(buffer.numberOfChannels);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels);
+            setUint16(buffer.numberOfChannels * 2);
+            setUint16(16);
+            
+            setUint32(0x61746164); // "data"
+            setUint32(length - pos - 4);
+            
+            const channels = [];
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+            
+            let offset = 0;
+            while (pos < length) {
+                for (let i = 0; i < buffer.numberOfChannels; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+            
+            return arrayBuffer;
+        }
+
+        // === FINE AUDIO TRIMMER FUNCTIONS ===
+
+        window.savePad = function() {
+            const name = document.getElementById('padName').value.trim();
+            
+            if (!name) {
+                alert(translations[currentLanguage].enterName);
+                return;
+            }
+            
+            pads[currentPadId].name = name;
+            pads[currentPadId].color = selectedColor;
+            
+            if (pendingAudioFile) {
+                // Controlla se è stato usato il trimmer
+                if (audioBuffer && (startPercent > 0 || endPercent < 100)) {
+                    // Usa audio tagliato
+                    trimAudio().then(blob => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const audioPath = e.target.result;
+                            pads[currentPadId].audioPath = audioPath;
+                            pads[currentPadId].audioFileName = 'trimmed_' + pendingAudioFile.name;
+                            pads[currentPadId].audio = new Audio(audioPath);
+                            pads[currentPadId].audio.volume = masterVolume;
+                            
+                            saveToLocalStorage();
+                            renderPads();
+                            closeModal();
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+                } else {
+                    // Usa file originale
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const audioPath = e.target.result;
+                        pads[currentPadId].audioPath = audioPath;
+                        pads[currentPadId].audioFileName = pendingAudioFile.name;
+                        pads[currentPadId].audio = new Audio(audioPath);
+                        pads[currentPadId].audio.volume = masterVolume;
+                        
+                        saveToLocalStorage();
+                        renderPads();
+                        closeModal();
+                    };
+                    reader.readAsDataURL(pendingAudioFile);
+                }
+            } else {
+                saveToLocalStorage();
+                renderPads();
+                closeModal();
+            }
+        };
+
+        window.clearPad = function() {
+            if (confirm(translations[currentLanguage].confirmClear)) {
+                pads[currentPadId].name = '';
+                pads[currentPadId].color = colors[Math.floor(currentPadId / 12) * 2];
+                pads[currentPadId].audioPath = null;
+                pads[currentPadId].audioFileName = '';
+                pads[currentPadId].audio = null;
+                pads[currentPadId].isPlaying = false;
+                
+                saveToLocalStorage();
+                renderPads();
+                closeModal();
+            }
+        };
+
+        // Language functions
+        window.selectLanguage = function(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('soundboard_language', lang);
+            document.getElementById('languageSelector').classList.remove('active');
+            init();
+        };
+        
+        function applyTranslations() {
+            const t = translations[currentLanguage];
+            
+            // Loading
+            const loading = document.getElementById('loading');
+            if (loading) loading.textContent = t.loading;
+            
+            // Categories - Desktop
+            const categories = document.querySelectorAll('.category-header');
+            if (categories.length >= 4) {
+                categories[0].textContent = t.intro;
+                categories[1].textContent = t.sounds;
+                categories[2].textContent = t.music;
+                categories[3].textContent = t.effects;
+            }
+            
+            // Modal
+            const modalHeader = document.querySelector('.modal-header');
+            if (modalHeader) modalHeader.textContent = t.configurePad;
+            
+            const padNameLabel = document.getElementById('padNameLabel');
+            if (padNameLabel) padNameLabel.textContent = t.padName;
+            
+            const colorLabel = document.getElementById('colorLabel');
+            if (colorLabel) colorLabel.textContent = t.color;
+            
+            const audioFileLabel = document.getElementById('audioFileLabel');
+            if (audioFileLabel) audioFileLabel.textContent = t.audioFile;
+            
+            const padNameInput = document.getElementById('padName');
+            if (padNameInput) padNameInput.placeholder = t.namePlaceholder;
+            
+            const fileBtn = document.getElementById('fileUploadBtn');
+            if (fileBtn && !fileBtn.classList.contains('has-file')) {
+                fileBtn.textContent = t.selectAudio;
+            }
+            
+            // Trimmer
+            const trimmerHeader = document.querySelector('.trimmer-header');
+            if (trimmerHeader) trimmerHeader.textContent = t.trimAudio;
+            
+            const trimmerLabels = document.querySelectorAll('.trimmer-slider-label span');
+            if (trimmerLabels.length >= 3) {
+                trimmerLabels[0].textContent = t.start;
+                trimmerLabels[2].textContent = t.end;
+            }
+            
+            const playText = document.getElementById('playText');
+            if (playText) playText.textContent = t.preview;
+            
+            // Buttons
+            const cancelBtn = document.querySelector('.btn-cancel');
+            if (cancelBtn) cancelBtn.textContent = t.cancel;
+            
+            const deleteBtn = document.querySelector('.btn-delete');
+            if (deleteBtn) deleteBtn.textContent = t.clear;
+            
+            const saveBtn = document.getElementById('saveBtn');
+            if (saveBtn) saveBtn.textContent = t.save;
+        }
+        
+        function checkLanguage() {
+            if (!currentLanguage) {
+                document.getElementById('languageSelector').classList.add('active');
+                return false;
+            }
+            return true;
+        }
+
+        function init() {
+            // Check language first
+            if (!checkLanguage()) {
+                return;
+            }
+            
+            applyTranslations();
+            checkScreenSize();
+            renderColorPicker();
+            setupPagination();
+            loadFromLocalStorage();
+            renderPads();
+            
+            document.getElementById('loading').style.display = 'none';
+            document.querySelector('.main-container').style.display = 'block';
+            
+            window.addEventListener('resize', () => {
+                checkScreenSize();
+                renderPads();
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
