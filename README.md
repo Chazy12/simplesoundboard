@@ -108,14 +108,6 @@ sudo dpkg -i soundboard_1.0.0_amd64.deb
 soundboard
 ```
 
-### Method 2: Standalone Executable
-
-```bash
-# Download index.html and logo.png
-# Open index.html with your preferred browser
-xdg-open index.html
-```
-
 ## ⌨️ Keyboard Shortcuts
 
 | Action | Key |
